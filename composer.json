@@ -1,0 +1,18 @@
+{
+	"autoload" : {
+		"psr-4" : {
+			"StrictDI\\" : "src",
+			"StrictDI\\TestMocks\\" : "tests\\mocks"
+		}
+	},
+	"name" : "basalovyurij/php-strict-di",
+	"version" : "0.1",
+	"type" : "library",
+	"description" : "",
+	"require" : {
+		"php" : ">=5.4"
+	},
+	"require-dev" : {
+		"phpunit/phpunit" : "^4"
+	}
+}
