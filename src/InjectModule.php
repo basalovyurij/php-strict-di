@@ -24,11 +24,11 @@ namespace StrictDI;
  */
 abstract class InjectModule  {
 	
-    private $kernel;
+    protected $kernel;
 	
 	public function setKernel($kernel) {
 		$this->kernel = $kernel;
 	}
 
-    protected abstract function load();
+    public abstract function load();
 }

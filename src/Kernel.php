@@ -44,11 +44,15 @@ class Kernel {
      */
     private $maxAutoBindingDepth;
 
-    public function __construct(InjectModule ... $modules) {
+    public function __construct($modules = array()) {
         $this->dependencies = array();
 		$this->isAutoBinding = true;
 		$this->maxAutoBindingDepth = 10;
 		
+        if(!is_array($modules)) {
+            $modules = array($modules);
+        }
+
 		foreach ($modules as $module) {
 			$module->setKernel($this);
 			$module->load();
