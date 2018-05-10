@@ -2,7 +2,7 @@
 /*
  * This file is part of https://github.com/basalovyurij/php-strict-di.
  * 
- * (C) Copyright 2018	Basalov Yurij. All rights reserved.
+ * (C) Copyright 2018    Basalov Yurij. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,18 +26,18 @@ namespace StrictDI;
  */
 class Kernel {
     
-	/**
+    /**
      * The collection of dependencies contained.
      * @var Dependency[]
      */
     private $dependencies;
-	
+    
     /**
      * Is auto binding enabled.
      * @var boolean
      */
     private $isAutoBinding;
-	
+    
     /**
      * Max recursion depth for auto binding.
      * @var integer
@@ -46,59 +46,50 @@ class Kernel {
 
     public function __construct($modules = array()) {
         $this->dependencies = array();
-		$this->isAutoBinding = true;
-		$this->maxAutoBindingDepth = 10;
-		
+        $this->isAutoBinding = true;
+        $this->maxAutoBindingDepth = 10;
+        
         if(!is_array($modules)) {
             $modules = array($modules);
         }
 
-		foreach ($modules as $module) {
-			$module->setKernel($this);
-			$module->load();
-		}
+        foreach ($modules as $module) {
+            $module->setKernel($this);
+            $module->load();
+        }
     }
 
     /**
      * Adds an object dependency
      *
-     * @param string   $className		The className of the dependency
-     * @param callable $depth			The recursion depth for the dependency object
+     * @param string   $className        The className of the dependency
+     * @param callable $depth            The recursion depth for the dependency object
      *
-     * @return Dependency 				The Dependency wrapper for next setup
-     * @throws ActivationException 		If the max autobinding depth exceeded
+     * @return Dependency                 The Dependency wrapper for next setup
+     * @throws ActivationException         If the max autobinding depth exceeded
      */
-    public function bind($className, $depth = 0) {
-		if($this->isAutoBinding) {
-			if($depth > 10) {
-				throw new ActivationException("Max search dependency depth exceeded. Maybe recursion binding");
-			}
-			
-			$dependency = new Dependency($this, $className);
-			$params = (new \ReflectionClass($className))->getConstructor()->getParameters();
-			foreach ($params as $param) {
-				$paramClassName = null;
-				$paramClass = $param->getClass();
-				if(isset($paramClass)) {
-					$paramClassName = $paramClass->getName();
-					$this->bind($paramClassName, $depth + 1);
-				}
-				$dependency->addParam($param->getName(), $paramClassName);
-			}
-		}
-		
+    public function bind($className) {        
+        $dependency = new Dependency($this, $className);
         $this->dependencies[$className] = $dependency;
-		
-		return $dependency;
+        
+        return $dependency;
     }
 
+    public function isAutoBinding() {
+        return $this->isAutoBinding;
+    }
+
+    public function getMaxAutoBindingDepth() {
+        return $this->maxAutoBindingDepth;
+    }
+    
     /**
      * Gets the dependency identified by the given className.
      *
-     * @param string $className			The className of the dependency
+     * @param string $className            The className of the dependency
      *
-     * @return object 					The object identified by the given id
-     * @throws ActivationException		If there's not dependency with the given id
+     * @return object                     The object identified by the given id
+     * @throws ActivationException        If there's not dependency with the given id
      */
     public function get($className, $params = array()) {
         if (!isset($this->dependencies[$className])) {

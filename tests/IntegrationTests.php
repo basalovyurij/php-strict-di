@@ -28,7 +28,7 @@ class IntegrationTests extends TestCase {
 	
     public function testParamaterlessDependency() {
         $kernel = new Kernel();
-		$kernel->bind('StrictDI\TestMocks\SimpleClass');
+		$kernel->bind('StrictDI\TestMocks\SimpleClass')->toSelf();
 		
 		$this->assertInstanceOf('StrictDI\TestMocks\SimpleClass', $kernel->get('StrictDI\TestMocks\SimpleClass'));
 		$this->assertGreaterThan(0, $kernel->get('StrictDI\TestMocks\SimpleClass')->getVal());
@@ -36,21 +36,21 @@ class IntegrationTests extends TestCase {
 	
 	public function testNotSingelton() {
         $kernel = new Kernel();
-		$kernel->bind('StrictDI\TestMocks\SimpleClass');
+		$kernel->bind('StrictDI\TestMocks\SimpleClass')->toSelf();
 		
 		$this->assertNotEquals($kernel->get('StrictDI\TestMocks\SimpleClass')->getVal(), $kernel->get('StrictDI\TestMocks\SimpleClass')->getVal());
     }
 	
 	public function testSingelton() {
         $kernel = new Kernel();
-		$kernel->bind('StrictDI\TestMocks\SimpleClass')->inSingeltonScope();
+		$kernel->bind('StrictDI\TestMocks\SimpleClass')->toSelf()->inSingeltonScope();
 		
 		$this->assertEquals($kernel->get('StrictDI\TestMocks\SimpleClass')->getVal(), $kernel->get('StrictDI\TestMocks\SimpleClass')->getVal());
     }
 	
 	public function testRealDependency() {
         $kernel = new Kernel();
-		$kernel->bind('StrictDI\TestMocks\CompositeClass');
+		$kernel->bind('StrictDI\TestMocks\CompositeClass')->toSelf();
 		
 		$this->assertInstanceOf('StrictDI\TestMocks\CompositeClass', $kernel->get('StrictDI\TestMocks\CompositeClass'));
 		$this->assertGreaterThan(0, $kernel->get('StrictDI\TestMocks\CompositeClass')->getVal());

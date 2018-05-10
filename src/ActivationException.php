@@ -2,7 +2,7 @@
 /*
  * This file is part of https://github.com/basalovyurij/php-strict-di.
  * 
- * (C) Copyright 2018	Basalov Yurij. All rights reserved.
+ * (C) Copyright 2018    Basalov Yurij. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ namespace StrictDI;
  * @author basalovyurij
  */
 class ActivationException extends \Exception {
-	
+    
     const DEFAULT_CODE = 1;
 
     public function __construct($message, \Exception $previous = null) {

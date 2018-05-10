@@ -2,7 +2,7 @@
 /*
  * This file is part of https://github.com/basalovyurij/php-strict-di.
  * 
- * (C) Copyright 2018	Basalov Yurij. All rights reserved.
+ * (C) Copyright 2018    Basalov Yurij. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,17 +30,17 @@ namespace StrictDI;
 class Dependency {
 
     private $kernel;
-	
+    
     private $className;
 
-	private $paramNames;
+    private $paramNames;
 
-	private $defaultParams;
+    private $defaultParams;
 
     private $instance;
-	
+    
     private $singleton;
-	
+    
     public function __construct(Kernel $kernel, $className) {
         $this->kernel = $kernel;
         $this->className = $className;
@@ -49,36 +49,45 @@ class Dependency {
         $this->instance = null;
         $this->singleton = false;
     }
-	
-	/**
+    
+    /**
      * 
      */
     public function addParam($name, $type) {
         $this->paramNames[$name] = $type;
     }
-	
+    
     /**
      * 
      */
     public function inSingeltonScope() {
         $this->singleton = true;
-		return $this;
+        return $this;
     }
-	
+    
     /**
      * 
      */
     public function to($className) {
         $this->className = $className;
-		return $this;
+        $this->createBinding(0);
+        return $this;
     }
-	
+    
+    /**
+     * 
+     */
+    public function toSelf($depth = 0) {
+        $this->createBinding($depth);
+        return $this;
+    }    
+    
     /**
      * 
      */
     public function withConstrucorArguments($params) {
         $this->defaultParams[] = $params;
-		return $this;
+        return $this;
     }
 
     /**
@@ -90,35 +99,54 @@ class Dependency {
         if (!$this->singleton) {
             return $this->create($customParams);
         }
-		
+        
         if ($this->instance === null) {
             $this->instance = $this->create($customParams);
         }
 
         return $this->instance;
     }
-	
-	/**
+    
+    /**
      * 
      */
     private function create($customParams) {
-		$args = array();
-		foreach ($this->paramNames as $name => $type) {
-			$args[] = $this->getParam($name, $type, $customParams);
-		}
-		
-		return (new \ReflectionClass($this->className))->newInstanceArgs($args);
-	}
-	
-	private function getParam($name, $type, $customParams) {
-		if(array_key_exists($name, $customParams)) {
-			return $customParams[$name];
-		} 
-		
-		if(array_key_exists($name, $this->defaultParams)) {
-			return $this->defaultParams[$name];
-		}
-			
-		return $this->kernel->get($type);
-	}
+        $args = array();
+        foreach ($this->paramNames as $name => $type) {
+            $args[] = $this->getParam($name, $type, $customParams);
+        }
+        
+        return (new \ReflectionClass($this->className))->newInstanceArgs($args);
+    }
+    
+    private function getParam($name, $type, $customParams) {
+        if(array_key_exists($name, $customParams)) {
+            return $customParams[$name];
+        } 
+        
+        if(array_key_exists($name, $this->defaultParams)) {
+            return $this->defaultParams[$name];
+        }
+            
+        return $this->kernel->get($type);
+    }
+    
+    private function createBinding($depth) {
+        if($depth > $this->kernel->getMaxAutoBindingDepth()) {
+            throw new ActivationException("Max search dependency depth exceeded. Maybe recursion binding");
+        }
+        
+        $params = (new \ReflectionClass($this->className))->getConstructor()->getParameters();
+        foreach ($params as $param) {
+            $paramClassName = null;
+            $paramClass = $param->getClass();
+            if(isset($paramClass)) {
+                $paramClassName = $paramClass->getName();
+                if($this->kernel->isAutoBinding()) {
+                    $this->kernel->bind($paramClassName)->toSelf($depth + 1);
+                }
+            }
+            $this->addParam($param->getName(), $paramClassName);
+        }
+    }
 }
