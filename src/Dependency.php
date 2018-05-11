@@ -85,8 +85,10 @@ class Dependency {
     /**
      * 
      */
-    public function withConstrucorArguments($params) {
-        $this->defaultParams[] = $params;
+    public function withConstrucorArguments(array $params) {
+        foreach ($params as $name => $value) {
+            $this->defaultParams[$name] = $value;
+        }
         return $this;
     }
 
@@ -95,7 +97,7 @@ class Dependency {
      *
      * @return mixed
      */
-    public function get($customParams) {
+    public function get(array $customParams = array()) {
         if (!$this->singleton) {
             return $this->create($customParams);
         }
@@ -110,7 +112,7 @@ class Dependency {
     /**
      * 
      */
-    private function create($customParams) {
+    private function create(array $customParams) {
         $args = array();
         foreach ($this->paramNames as $name => $type) {
             $args[] = $this->getParam($name, $type, $customParams);
@@ -119,7 +121,7 @@ class Dependency {
         return (new \ReflectionClass($this->className))->newInstanceArgs($args);
     }
     
-    private function getParam($name, $type, $customParams) {
+    private function getParam($name, $type, array $customParams) {
         if(array_key_exists($name, $customParams)) {
             return $customParams[$name];
         } 
@@ -127,8 +129,12 @@ class Dependency {
         if(array_key_exists($name, $this->defaultParams)) {
             return $this->defaultParams[$name];
         }
-            
-        return $this->kernel->get($type);
+          
+        if(isset($type)) {
+            return $this->kernel->get($type);
+        }
+        
+        throw new ActivationException("Failed to get argument [{$name}] of type [{$type}] while activating [{$this->className}]");
     }
     
     private function createBinding($depth) {
@@ -138,6 +144,12 @@ class Dependency {
         
         $params = (new \ReflectionClass($this->className))->getConstructor()->getParameters();
         foreach ($params as $param) {
+            $name = $param->getName();
+            
+            if($param->isDefaultValueAvailable()) {
+                $this->defaultParams[$name] = $param->getDefaultValue();
+            }
+            
             $paramClassName = null;
             $paramClass = $param->getClass();
             if(isset($paramClass)) {
@@ -146,7 +158,7 @@ class Dependency {
                     $this->kernel->bind($paramClassName)->toSelf($depth + 1);
                 }
             }
-            $this->addParam($param->getName(), $paramClassName);
+            $this->addParam($name, $paramClassName);
         }
     }
 }

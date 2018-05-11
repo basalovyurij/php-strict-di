@@ -91,7 +91,7 @@ class Kernel {
      * @return object                     The object identified by the given id
      * @throws ActivationException        If there's not dependency with the given id
      */
-    public function get($className, $params = array()) {
+    public function get($className, array $params = array()) {
         if (!isset($this->dependencies[$className])) {
             throw new ActivationException("Dependency identified by '$className' does not exist");
         }
