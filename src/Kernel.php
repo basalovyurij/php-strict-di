@@ -75,6 +75,10 @@ class Kernel {
         return $dependency;
     }
 
+    public function hasBinging($className) {        
+        return array_key_exists($className, $this->dependencies);
+    }
+
     public function isAutoBinding() {
         return $this->isAutoBinding;
     }

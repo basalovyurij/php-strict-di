@@ -154,7 +154,7 @@ class Dependency {
             $paramClass = $param->getClass();
             if(isset($paramClass)) {
                 $paramClassName = $paramClass->getName();
-                if($this->kernel->isAutoBinding()) {
+                if(!$this->kernel->hasBinging($paramClassName) && $this->kernel->isAutoBinding()) {
                     $this->kernel->bind($paramClassName)->toSelf($depth + 1);
                 }
             }
