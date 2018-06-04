@@ -85,7 +85,7 @@ class Dependency {
     /**
      * 
      */
-    public function withConstrucorArguments(array $params) {
+    public function withConstructorArguments(array $params) {
         foreach ($params as $name => $value) {
             $this->defaultParams[$name] = $value;
         }
